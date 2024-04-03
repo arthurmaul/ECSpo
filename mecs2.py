@@ -21,7 +21,7 @@ def delete(eid):
 
 def query(*cids):
     eids        = [set(registry[cid]) for cid in cids]
-    common_eids = reduce(lambda accumulator, value: accumulator & value, eids)
+    common_eids = common_eids = eids[0].intersection(eid[1:])
     components  = [[registry[cid][eid] for eid in common_eids] for cid in cids]
     return components
 
