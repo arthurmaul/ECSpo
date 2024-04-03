@@ -1,5 +1,4 @@
 '''MECS-2: A minimal ecs in 50 lines, version 2. Written by Arthur Maul.'''
-from functools import reduce
 from collections import defaultdict
 
 owners    = defaultdict(list)
@@ -25,7 +24,7 @@ def delete(eid):
 def query(*cids):
     '''Returns a set of arrays, in the order of component ids provided, with each holding the components of that type.'''
     eids        = [set(registry[cid]) for cid in cids]
-    common_eids = reduce(lambda accumulator, value: accumulator & value, eids)
+    common_eids = common_eids = eids[0].intersection(eid[1:])
     components  = [[registry[cid][eid] for eid in common_eids] for cid in cids]
     return components
 
