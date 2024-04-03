@@ -1,5 +1,4 @@
 """MECS-2: A minimal ecs in 50 lines, version 2. Written by Arthur Maul."""
-from functools import reduce
 from collections import defaultdict
 
 owners    = defaultdict(list)
