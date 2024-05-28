@@ -7,7 +7,7 @@
 - generic api, allowing use in game dev, app dev, or other applications
 ---
 
-## installation
+## Installation
 the easiest way to get up and running is to start you vm of choice and then to use pip
   
 ```
@@ -20,13 +20,10 @@ it can then be imported using the library name under whatever alias you want
 import mecs as engine
 ```
 
-</details>
+# Getting started
+you can find the docs for contributors [here](docs/for_contributors/getting_started.md) and for users [here](docs/for_users/getting_started.md). there is also a [reference](docs/reference/index.md) and an [example](example.py) provided to lay out the feature set of the library. cant find an answer? im at arthurmiiengineering@gmail.com, you can shoot me an email!
 
-## configuration
-- the exit keyword can be set directly by doing `mecs.EXIT = new_exit_code`
-- more coming soon!
-
-## features
+## Features
 - [x] Entity creation/deletion
 - [x] Component attachment/detachment
 - [ ] Batch addition
