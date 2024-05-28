@@ -20,7 +20,7 @@ it can then be imported using the library name under whatever alias you want
 import mecs as engine
 ```
 
-# Getting started
+## Getting started
 1. You can find the docs for contributors [here](docs/for_contributors/getting_started.md) and for users [here](docs/for_users/getting_started.md)
 2. The [reference](docs/reference/index.md) and an [example](example.py) are provided to lay out the feature set of the library once you've got the basics down
 3. Still have questions? im at arthurmiiengineering@gmail.com, you can shoot me an email!
