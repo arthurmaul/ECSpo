@@ -1,0 +1,16 @@
+Metadata-Version: 2.1
+Name: py-mecs
+Version: 0.0.2
+Summary: A simple entity component system for python
+Author-email: Arthur Maul <arthurmiiengineering@gmail.com>
+Project-URL: Homepage, https://github.com/pypa/sampleproject
+Project-URL: Issues, https://github.com/pypa/sampleproject/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+# Mecs2
+## A simple ecs implementation in 50 lines.
