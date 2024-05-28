@@ -8,12 +8,15 @@
 ---
 <details>
 
-<summary> ## installation
+## <summary> installation
 the easiest way to get up and running is to start you vm of choice and then to use pip
+  
 ```
 pip install py-mecs
 ```
+
 it can then be imported using the library name under whatever alias you want
+
 ```py
 import mecs as engine
 ```
