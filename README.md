@@ -6,9 +6,8 @@
 - built as a simple implementation of ecs
 - generic api, allowing use in game dev, app dev, or other applications
 ---
-<details>
 
-## <summary> installation
+## installation
 the easiest way to get up and running is to start you vm of choice and then to use pip
   
 ```
@@ -26,6 +25,7 @@ import mecs as engine
 ## configuration
 - the exit keyword can be set directly by doing `mecs.EXIT = new_exit_code`
 - more coming soon!
+
 ## features
 - [x] Entity creation/deletion
 - [x] Component attachment/detachment
