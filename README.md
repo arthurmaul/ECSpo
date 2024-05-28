@@ -21,7 +21,9 @@ import mecs as engine
 ```
 
 # Getting started
-you can find the docs for contributors [here](docs/for_contributors/getting_started.md) and for users [here](docs/for_users/getting_started.md). there is also a [reference](docs/reference/index.md) and an [example](example.py) provided to lay out the feature set of the library. cant find an answer? im at arthurmiiengineering@gmail.com, you can shoot me an email!
+1. You can find the docs for contributors [here](docs/for_contributors/getting_started.md) and for users [here](docs/for_users/getting_started.md)
+2. The [reference](docs/reference/index.md) and an [example](example.py) are provided to lay out the feature set of the library once you've got the basics down
+3. Still have questions? im at arthurmiiengineering@gmail.com, you can shoot me an email!
 
 ## Features
 - [x] Entity creation/deletion
