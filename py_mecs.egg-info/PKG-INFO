@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: py-mecs
-Version: 0.0.2
+Version: 0.0.3
 Summary: A simple entity component system for python
 Author-email: Arthur Maul <arthurmiiengineering@gmail.com>
 Project-URL: Homepage, https://github.com/pypa/sampleproject
