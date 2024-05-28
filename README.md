@@ -1,2 +1,2 @@
-# Mecs2
+# Mecs
 ## A simple ecs implementation in python.
