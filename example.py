@@ -2,7 +2,7 @@
 from types import SimpleNamespace # for simple dummy objects.
 
 #lib
-import package as engine
+import mecs as engine
 
 def movement_system(): # translates velocity onto position.
     positions, velocities = engine.query('position', 'velocity')
