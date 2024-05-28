@@ -1,2 +1,2 @@
 # Mecs2
-## A simple ecs implementation in 50 lines.
+## A simple ecs implementation in python.
