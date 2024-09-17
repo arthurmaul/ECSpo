@@ -6,6 +6,10 @@ from collections import defaultdict
 from uuid import uuid4
 
 
+class RecursiveSubscription(Exception):
+    ...
+
+
 context = list()
 
 class Scene:    
@@ -39,8 +43,10 @@ def shutdown():
 
 
 class Channel:
-    def __init__(self, *responders):
+    def __init__(self, *responders, signal=None):
+        self.signal = signal or str(uuid4())
         self.responders = list(responders)
+        self.active = False
         
     def __iter__(self):
         yield from self.responders
@@ -52,11 +58,14 @@ class Channel:
         self.responders.append(responder)
         
     def emit(self, *args, **kwargs):
-        # TODO: Implement recursion detection.
+        if self.active:
+            raise RecursiveSubscription(f"Recursive signal to {self.signal} channel was detected (likely caused by the channel having itself as one of the responders or one of the responder channels had this channel as a responder creating a cycle of emitting signals forever)")
+        self.active = True
         return [responder.emit(*args, **kwargs)
             if isinstance(responder, type(self))
             else responder(*args, **kwargs)
             for responder in self.responders]
+        self.active = False
 
 
 class Storage:
@@ -151,7 +160,6 @@ class Entity:
 
     def despawn(self):
         self.storage.despawn(self.eid)
-        del self
 
 
 class Template:
@@ -208,12 +216,12 @@ class Observer:
 
     def accept(self, eid):
         if eid in self.eids:
-            return
+            return None
         self.eids.add(eid)
 
     def reject(self, eid):
         if not eid in self.eids:
-            return
+            return None
         self.eids.remove(eid)
 
     def check(self, eid):
@@ -222,7 +230,8 @@ class Observer:
         disqualifies = (self.storage.has(eid, cid)
             for cid in self.exclude)
         if all(qualifies) and not any(disqualifies):
-            return self.accept(eid)
+            self.accept(eid)
+            return None
         self.reject(eid)
         return self
 
