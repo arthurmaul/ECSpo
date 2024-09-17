@@ -3,12 +3,12 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "py-mecs"
+name = "pedecs"
 version = "0.0.3"
 authors = [
-  { name="Arthur Maul", email="arthurmiiengineering@gmail.com" },
+  { name="Arthur Maul II", email="arthurmiiengineering@gmail.com" },
 ]
-description = "A simple entity component system for python"
+description = "A pythonic event driven entity component system"
 readme = "README.md"
 requires-python = ">=3.8"
 classifiers = [
