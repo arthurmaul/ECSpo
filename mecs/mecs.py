@@ -69,12 +69,9 @@ class Storage:
     def __init__(self):
         self.eindex = dict() # entities
         self.cindex = dict() # components
-        self.vindex = dict() # views
+        self.iobs = dict() # including observers
+        self.eobs = dict() # excluding observers
         self.EID = self.pool("_EID")
-
-    def __repr__(self):
-        components = "\n        ".join(f"{cid}: [{", ".join(coms)}]" for cid, coms in self.cindex.items())
-        return f"Storage(\n    entities: [{", ".join(self.eindex)}]\n    components: \n        {components})"
 
     def handle(self, eid=None):
         if not eid:
@@ -96,13 +93,15 @@ class Storage:
 
     def pool(self, cid=None):
         cid = cid or str(uuid4())
-        self.vindex[cid] = set()
+        self.iobs[cid] = set()
+        self.eobs[cid] = set()
         self.cindex[cid] = dict()
         return cid
 
     def tag(self, cid=None):
         cid = cid or str(uuid4())
-        self.vindex[cid] = set()
+        self.iobs[cid] = set()
+        self.eobs[cid] = set()
         return cid
     
     def release(self, cid):
@@ -116,15 +115,19 @@ class Storage:
         if obj:
             self.cindex[cid][eid] = obj
         self.eindex[eid].add(cid)
-        for view in self.vindex[cid]:
-            view.check(eid)
+        for obs in self.iobs[cid]:
+            obs.check(eid)
+        for obs in self.eobs[cid]:
+            obs.reject(eid)
 
     def unset(eid, cid):
         if cid in self.cindex:
             self.cindex[cid].pop(eid)
         self.eindex[eid].remove(cid)
-        for view in self.vindex[cid]:
-            view.check(eid)
+        for obs in self.iobs[cid]:
+            obs.reject(eid)
+        for obs in self.eobs[cid]:
+            obs.check(eid)
 
     def get(self, eid, cid):
         if not cid in self.cindex:
@@ -179,16 +182,13 @@ class Template:
         return eid
 
 
-class View:
+class Observer:
     def __init__(self, storage):
         self.storage = storage
         self.eids = set()
         self.cids = list()
         self.include = set()
         self.exclude = set()
-
-    def __repr__(self):
-        return f"View({self.eids})"
 
     def __iter__(self):
         yield from ((self.storage.get(eid, cid)
@@ -199,6 +199,11 @@ class View:
         self.cids.extend(cids)
         return self
 
+    def deselect(self, *cids):
+        for cid in cids:
+            self.cids.remove(cid)
+        return self
+
     def where(self, *cids):
         self.include.update(cids)
         return self
@@ -207,23 +212,35 @@ class View:
         self.exclude.update(cids)
         return self
 
+    def accept(self, eid):
+        if eid in self.eids:
+            return
+        self.eids.add(eid)
+
+    def reject(self, eid):
+        if not eid in self.eids:
+            return
+        self.eids.remove(eid)
+
     def check(self, eid):
-        if not all(self.storage.has(eid, cid) for cid in self.include):
-            if eid in self.eids:
-                self.eids.remove(eid)
-        elif any(self.storage.has(eid, cid) for cid in self.exclude):
-            if eid in self.eids:
-                self.eids.remove(eid)
-        else:
-            self.eids.add(eid)
+        qualifies = (self.storage.has(eid, cid)
+            for cid in self.include)
+        disqualifies = (self.storage.has(eid, cid)
+            for cid in self.exclude)
+        if all(qualifies) and not any(disqualifies):
+            return self.accept(eid)
+        self.reject(eid)
         return self
 
     def build(self):
         for cid in self.include:
-            self.storage.vindex[cid].add(self)
+            self.storage.iobs[cid].add(self)
         for cid in self.exclude:
-            self.storage.vindex[cid].add(self)
+            self.storage.eobs[cid].add(self)
         return self
 
-
+    def scan(self):
+        for cid in self.include:
+            for eid in self.storage.cindex[cid]:
+                self.check(eid)
 
