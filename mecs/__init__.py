@@ -1,1 +1,2 @@
-from mecs.mecs import *
+from mecs import Scene, Channel, Storage, Entity, Observer, Template
+

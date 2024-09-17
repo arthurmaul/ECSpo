@@ -18,8 +18,8 @@ class Scene:
     def enter(self):
         self.startup.emit()
         self.running = True
+        context.append(self)
         while self.running:
-            context.append(self)
             self.updates.emit()
         self.cleanup.emit()
 
@@ -33,8 +33,8 @@ def exit():
 def swap(scene):
     context[-1] = scene
 
-def quit():
-    for scene in context:
+def shutdown():
+    for scene in context.copy():
         scene.exit()
 
 
@@ -53,6 +53,7 @@ class Channel:
         
     def emit(self, *args, **kwargs):
         for responder in self.responders:
+            # TODO: Implement recursion detection.
             if isinstance(responder, type(self)):
                 responder.emit(*args, **kwargs)
             else:
