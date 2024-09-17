@@ -1,63 +1,229 @@
-'''MECS-2: A minimal ecs in 50 lines, version 2. Written by Arthur Maul.'''
+"""MECS: A minimal ecs. Written by Arthur Maul II."""
+
+
 from collections import defaultdict
 
-owners    = defaultdict(list)
-registry  = defaultdict(dict)
-resources = dict()
-queue     = defaultdict(dict)
-EXIT      = 'exit'
+from uuid import uuid4
 
-def attach(cid, eid, component):
-    '''Adds a component under an entity id and stores the component id under that entity id.'''
-    owners[eid].append(cid)
-    registry[cid][eid] = component
-    return attach
 
-def detach(cid, eid):
-    '''Removes both the reference to the component and the component itself from the entity id.'''
-    owners[eid].remove(cid)
-    registry[cid].pop(eid)
-    return detach
+context = list()
 
-def delete(eid):
-    '''Removes all the components of an entity.'''
-    [detach(cid, eid) for cid in owners[eid]]
-    return delete
+class Scene:    
+    def __init__(self, startup, updates, cleanup):
+        self.running = False
+        self.startup = startup
+        self.updates = updates
+        self.cleanup = cleanup
 
-def query(*cids):
-    '''Returns a set of arrays, in the order of component ids provided, with each holding the components of that type.'''
-    eids        = [set(registry[cid]) for cid in cids]
-    common_eids = common_eids = eids[0].intersection(*eids[1:])
-    components  = [[registry[cid][eid] for eid in common_eids] for cid in cids]
-    return components
+    def enter(self):
+        self.startup.emit()
+        self.running = True
+        while self.running:
+            context.append(self)
+            self.updates.emit()
+        self.cleanup.emit()
 
-def store(**resources):
-    '''Stores a resource to be accessed via the "resource" function.'''
-    resources.update(resources)
-    return store
+    def exit(self):
+        context.remove(self)
+        self.running = False
 
-def resource(key):
-    '''Returns a resource stored in the dictionary.'''
-    return resources[key]
+def exit():
+    context[-1].exit()
 
-def schedule(stage, system, slot: int = 1000) -> None:
-    '''Adds a system under a stage, with a slot if provided.'''
-    if not slot in queue[stage]: queue[stage][slot] = list()
-    queue[stage][slot].append(system)
-    return schedule
+def swap(scene):
+    context[-1] = scene
 
-def run(stage):
-    '''Runs all the systems in a stage in ascending order, first based on slot, then based on registration order.'''
-    ordered = dict(sorted(queue[stage].items()))
-    output  = [[system() for system in systems] for slot, systems in ordered.items()]
-    for values in output:
-        if EXIT in values: return EXIT
+def quit():
+    for scene in context:
+        scene.exit()
 
-def main():
-    '''Provides 7 base events and runs them in proper order, provided an exit to be used to break out of the gameloop.'''
-    run('StartUp')
-    while True:
-        stages = ('Dispatch', 'PreUpdate', 'Update', 'PostUpdate', 'Draw')
-        output = [run(stage) for stage in stages]
-        if EXIT in output: break
-    run('ShutDown')
+
+class Channel:
+    def __init__(self, *responders):
+        self.responders = list(responders)
+        
+    def __iter__(self):
+        yield from self.responders
+
+    def __call__(self, responder):
+        self.connect(responder)
+        
+    def connect(self, responder):
+        self.responders.append(responder)
+        
+    def emit(self, *args, **kwargs):
+        for responder in self.responders:
+            if isinstance(responder, type(self)):
+                responder.emit(*args, **kwargs)
+            else:
+                responder(*args, **kwargs)
+
+    def gather(self, *args, **kwargs):
+        return (responder.emit(*args, **kwargs)
+            if isinstance(responder, type(self))
+            else responder(*args, **kwargs)
+            for responder in self.responders)
+
+
+class Storage:
+    def __init__(self):
+        self.eindex = dict() # entities
+        self.cindex = dict() # components
+        self.vindex = dict() # views
+        self.EID = self.pool("_EID")
+
+    def __repr__(self):
+        components = "\n        ".join(f"{cid}: [{", ".join(coms)}]" for cid, coms in self.cindex.items())
+        return f"Storage(\n    entities: [{", ".join(self.eindex)}]\n    components: \n        {components})"
+
+    def handle(self, eid=None):
+        if not eid:
+            eid = self.spawn()
+        if not eid in self.eindex:
+            eid = self.spawn(eid)
+        return Entity(self, eid)
+
+    def spawn(self, eid=None):
+        eid = eid or str(uuid4())
+        self.eindex[eid] = set()
+        self.set(eid, self.EID, eid)
+        return eid
+    
+    def despawn(self, eid):
+        for cid in self.eindex[eid]:
+            unset(cid, eid)
+        self.eindex.pop(eid)
+
+    def pool(self, cid=None):
+        cid = cid or str(uuid4())
+        self.vindex[cid] = set()
+        self.cindex[cid] = dict()
+        return cid
+
+    def tag(self, cid=None):
+        cid = cid or str(uuid4())
+        self.vindex[cid] = set()
+        return cid
+    
+    def release(self, cid):
+        if cid in self.cindex:
+            for eid in self.cindex[cid]:
+                self.unset(eid, cid)
+        self.vindex.pop(cid)
+        self.cindex.pop(cid)
+
+    def set(self, eid, cid, obj=None):
+        if obj:
+            self.cindex[cid][eid] = obj
+        self.eindex[eid].add(cid)
+        for view in self.vindex[cid]:
+            view.check(eid)
+
+    def unset(eid, cid):
+        if cid in self.cindex:
+            self.cindex[cid].pop(eid)
+        self.eindex[eid].remove(cid)
+        for view in self.vindex[cid]:
+            view.check(eid)
+
+    def get(self, eid, cid):
+        if not cid in self.cindex:
+            return
+        return self.cindex[cid][eid]
+
+    def has(self, eid, cid):
+        return cid in self.eindex[eid]
+
+
+class Entity:
+    def __init__(self, storage, eid):
+        self.eid = eid
+        self.storage = storage
+
+    def set(self, cid, obj=None):
+        self.storage.set(self.eid, cid, obj)
+
+    def unset(self, cid):
+        self.storage.unset(self.eid, cid)
+
+    def get(self, cid):
+        self.storage.get(self.eid, cid)
+
+    def has(self, cid):
+        self.storage.has(self.eid, cid)
+
+    def despawn(self):
+        self.storage.despawn(self.eid)
+        del self
+
+
+class Template:
+    def __init__(self, storage):
+        self.template = list()
+        self.storage = storage
+
+    def root(self, storage):
+        self.storage = storage
+        return self
+
+    def set(self, cid, cls, *args, **kwargs):
+        self.template.append((cid, cls, args, kwargs))
+        return self
+
+    def build(self, eid=None):
+        if not self.storage:
+            return
+        eid = self.storage.spawn(eid)
+        for cid, cls, args, kwargs in self.template:
+            self.storage.set(eid, cid, cls(*args, **kwargs))
+        return eid
+
+
+class View:
+    def __init__(self, storage):
+        self.storage = storage
+        self.eids = set()
+        self.cids = list()
+        self.include = set()
+        self.exclude = set()
+
+    def __repr__(self):
+        return f"View({self.eids})"
+
+    def __iter__(self):
+        yield from ((self.storage.get(eid, cid)
+            for cid in self.cids)
+            for eid in self.eids)
+
+    def select(self, *cids):
+        self.cids.extend(cids)
+        return self
+
+    def where(self, *cids):
+        self.include.update(cids)
+        return self
+
+    def unless(self, *cids):
+        self.exclude.update(cids)
+        return self
+
+    def check(self, eid):
+        if not all(self.storage.has(eid, cid) for cid in self.include):
+            if eid in self.eids:
+                self.eids.remove(eid)
+        elif any(self.storage.has(eid, cid) for cid in self.exclude):
+            if eid in self.eids:
+                self.eids.remove(eid)
+        else:
+            self.eids.add(eid)
+        return self
+
+    def build(self):
+        for cid in self.include:
+            self.storage.vindex[cid].add(self)
+        for cid in self.exclude:
+            self.storage.vindex[cid].add(self)
+        return self
+
+
+
