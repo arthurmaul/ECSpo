@@ -52,18 +52,11 @@ class Channel:
         self.responders.append(responder)
         
     def emit(self, *args, **kwargs):
-        for responder in self.responders:
-            # TODO: Implement recursion detection.
-            if isinstance(responder, type(self)):
-                responder.emit(*args, **kwargs)
-            else:
-                responder(*args, **kwargs)
-
-    def gather(self, *args, **kwargs):
-        return (responder.emit(*args, **kwargs)
+        # TODO: Implement recursion detection.
+        return [responder.emit(*args, **kwargs)
             if isinstance(responder, type(self))
             else responder(*args, **kwargs)
-            for responder in self.responders)
+            for responder in self.responders]
 
 
 class Storage:
@@ -89,7 +82,7 @@ class Storage:
     
     def despawn(self, eid):
         for cid in self.eindex[eid]:
-            unset(cid, eid)
+            self.unset(cid, eid)
         self.eindex.pop(eid)
 
     def pool(self, cid=None):
