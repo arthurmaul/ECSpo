@@ -38,8 +38,8 @@ This allows us to filter entities with them, but they dont store anything.
 """
 # NOTE: By passing in a string, we can explcitly state what we want the component to be identified as.
 
-pos = world.pool("position")
-vel = world.pool("velocity")
+pos    = world.pool("position")
+vel    = world.pool("velocity")
 frozen = world.tag("frozen")
 
 """
@@ -70,11 +70,12 @@ moveables = (Observer(world)
     .unless(frozen)
     .build())
 
-knight1 = movable.build("knight 1")
+knight1 = movable.build("k1")
 goblin1 = movable.build("g1")
 goblin2 = movable.build("g2")
 goblin3 = movable.build("g3")
-world.set(goblin3, frozen)
+# world.set(goblin3, frozen)
+world.get(goblin3, pos).x = 100
 
 
 launch = Channel()
@@ -87,7 +88,7 @@ events = Channel()
 def input_system():
     match input('> '):
         case "quit" | "q":
-            engine.quit()
+            engine.shutdown()
 events.connect(input_system)
 
 

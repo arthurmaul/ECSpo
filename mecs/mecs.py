@@ -61,11 +61,12 @@ class Channel:
         if self.active:
             raise RecursiveSubscription(f"Recursive signal to {self.signal} channel was detected (likely caused by the channel having itself as one of the responders or one of the responder channels had this channel as a responder creating a cycle of emitting signals forever)")
         self.active = True
-        return [responder.emit(*args, **kwargs)
+        response = [responder.emit(*args, **kwargs)
             if isinstance(responder, type(self))
             else responder(*args, **kwargs)
             for responder in self.responders]
         self.active = False
+        return response
 
 
 class Storage:
@@ -123,7 +124,7 @@ class Storage:
         for obs in self.eobs[cid]:
             obs.reject(eid)
 
-    def unset(eid, cid):
+    def unset(self, eid, cid):
         if cid in self.cindex:
             self.cindex[cid].pop(eid)
         self.eindex[eid].remove(cid)
