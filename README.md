@@ -31,3 +31,6 @@ import mecs as engine
 - [x] system schedule
 - [x] custom scheduling
 - [ ] async scheduling
+
+## Credits
+Massive thanks to [Matiiss](https://github.com/Matiiss) for doing code review, this project would be a mess without it!
