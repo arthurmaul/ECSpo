@@ -1,3 +1,0 @@
-"""
-Cli Editor/Inspector 
-"""
