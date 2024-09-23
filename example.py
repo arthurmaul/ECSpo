@@ -7,7 +7,7 @@ import mecs as engine
 
 # Next I normally pull in a few modules for convinience.
 # You can easily use `engine.<function | Class>` if you want.
-from mecs import Storage, Template, Observer, Channel, Scene
+from mecs import Storage, Prototype, Observer, Channel, Scene
 
 
 # A simple way to test things is with a movement system.
@@ -43,18 +43,6 @@ vel    = world.pool("velocity")
 frozen = world.tag("frozen")
 
 """
-Templates
-=============
-Templates allow us to avoid repetative assignments when constructing entities.
-We can define what classes and values they will use, and simply build them on demand.
-"""
-# NOTE: Templates are bound to a storage, but they can be reparented with the `template.root(<storage>)` method.
-
-movable = (Template(world)
-    .set(pos, Vec2, 0, 0)
-    .set(vel, Vec2, 5, 5))
-
-"""
 Observers
 ========
 Observers are updated every time a component is set or removed, and are iterable, allowing you to access matching entities.
@@ -70,10 +58,22 @@ moveables = (Observer(world)
     .unless(frozen)
     .build())
 
-knight1 = movable.build("k1")
-goblin1 = movable.build("g1")
-goblin2 = movable.build("g2")
-goblin3 = movable.build("g3")
+"""
+Templates
+=============
+Templates allow us to avoid repetative assignments when constructing entities.
+We can define what classes and values they will use, and simply build them on demand.
+"""
+# NOTE: Templates are bound to a storage, but they can be reparented with the `template.root(<storage>)` method.
+
+movable = (Prototype(world)
+    .set(pos, Vec2, 0, 0)
+    .set(vel, Vec2, 5, 5))
+
+knight1 = movable.clone("k1")
+goblin1 = movable.clone("g1")
+goblin2 = movable.clone("g2")
+goblin3 = movable.clone("g3")
 # world.set(goblin3, frozen)
 world.get(goblin3, pos).x = 100
 
