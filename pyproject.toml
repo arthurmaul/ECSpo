@@ -3,8 +3,8 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "py-mecs"
-version = "0.1.1"
+name = "ecspo"
+version = "0.2.0"
 authors = [
   { name="Arthur Maul II", email="arthurmiiengineering@gmail.com" },
 ]
@@ -18,5 +18,5 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/arthurmaul/Mecs"
-Issues = "https://github.com/arthurmaul/Mecs/issues"
+Homepage = "https://github.com/arthurmaul/ECSpo"
+Issues = "https://github.com/arthurmaul/ECSpo/issues"
