@@ -33,4 +33,5 @@ import ecspo as engine
 - [x] multi component queries
 
 ## Credits
+Heavily inspired by tinyecs
 Massive thanks to [Matiiss](https://github.com/Matiiss) for doing code review, this project would be a mess without it!
