@@ -81,24 +81,30 @@ class Entity:
 
     def set(self, cid, obj=None):
         self.storage.set(self.eid, cid, obj)
+        return self
 
     def unset(self, cid):
         self.storage.unset(self.eid, cid)
+        return self
 
     def get(self, cid):
-        self.storage.get(self.eid, cid)
+        return self.storage.get(self.eid, cid)
 
     def has(self, cid):
-        self.storage.has(self.eid, cid)
+        return self.storage.has(self.eid, cid)
 
     def despawn(self):
         self.storage.despawn(self.eid)
+        return self
 
 
 class Prototype:
     def __init__(self, root):
         self.data = list()
         self.root = root
+
+    def extends(self, prototype):
+        self.data.extend(prototype.data)
 
     def reparent(self, root):
         self.root = root
@@ -108,7 +114,7 @@ class Prototype:
         self.data.append((cid, cls, args, kwargs))
         return self
 
-    def build(self, eid=None):
+    def clone(self, eid=None):
         eid = self.root.spawn(eid)
         for cid, cls, args, kwargs in self.data:
             self.root.set(eid, cid, cls(*args, **kwargs))

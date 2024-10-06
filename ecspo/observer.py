@@ -1,24 +1,17 @@
 class Observer:
     def __init__(self, storage):
         self.storage = storage
-        self.eids = set()
-        self.cids = list()
         self.include = set()
         self.exclude = set()
+        self.eids = set()
 
     def __iter__(self):
-        yield from ((self.storage.get(eid, cid)
-            for cid in self.cids)
-            for eid in self.eids)
+        yield from self.eids
 
     def select(self, *cids):
-        self.cids.extend(cids)
-        return self
-
-    def deselect(self, *cids):
-        for cid in cids:
-            self.cids.remove(cid)
-        return self
+        yield from (tuple(self.storage.get(eid, cid)
+            for cid in cids)
+            for eid in self)
 
     def where(self, *cids):
         self.include.update(cids)
@@ -56,7 +49,7 @@ class Observer:
             self.storage.eobs[cid].add(self)
         return self
 
-    def scan(self):
+    def search(self):
         for cid in self.include:
             for eid in self.storage.cindex[cid]:
                 self.check(eid)

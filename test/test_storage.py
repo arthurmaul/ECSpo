@@ -1,7 +1,7 @@
 import unittest
 from unittest import TestCase
 
-from ecspo import Storage
+from ecspo import Storage, Entity, Prototype
 
 
 class TestStorage(TestCase):

@@ -28,7 +28,7 @@ class TestChannel(TestCase):
         self.channel.connect(map)
         self.assertListEqual([sum, map], self.channel.responders)
 
-    def test_emit_response(self):
+    def test_emit(self):
         """
         Ensure the channel.emit method functions correctly and detects improper use.
         """
