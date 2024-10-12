@@ -1,5 +1,4 @@
-from ecspo.channel  import Channel, RecursiveSubscription
-from ecspo.observer import Observer
-from ecspo.scene    import Scene, leave, change, shutdown
-from ecspo.storage  import Storage, Entity, Prototype
+from ecspo.channel  import Channel, RecursiveConnection
+from ecspo.query import Query
+from ecspo.table  import Table, InvalidTag, InvalidPool, EntityDataNotFound, ComponentMapNotFound
 

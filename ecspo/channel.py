@@ -1,33 +1,34 @@
 from uuid import uuid4
 
 
-class RecursiveSubscription(Exception):
+class RecursiveConnection(Exception):
     ...
 
 
 class Channel:
-    def __init__(self, *responders, ID=None):
-        self.ID = ID or str(uuid4())
-        self.responders = list(responders)
+    def __init__(self, *recievers):
+        self.recievers = list(recievers)
         self.active = False
         
     def __iter__(self):
-        yield from self.responders
+        yield from self.recievers
 
-    def __call__(self, responder):
-        self.connect(responder)
+    def __call__(self, reciever):
+        self.connect(reciever)
+        return reciever
         
-    def connect(self, responder):
-        self.responders.append(responder)
+    def connect(self, reciever):
+        self.recievers.append(reciever)
+        return self
         
     def emit(self, *args, **kwargs):
         if self.active:
-            raise RecursiveSubscription(f"Recursive signal to {self.ID} channel was detected (likely caused by the channel having itself as one of the responders or one of the responder channels had this channel as a responder)")
+            raise RecursiveConnection(f"Ensure neither the channel itself or any of its reciever channels have this channel as a reciever.")
         self.active = True
-        response = [responder.emit(*args, **kwargs)
-            if isinstance(responder, type(self))
-            else responder(*args, **kwargs)
-            for responder in self.responders]
+        response = [reciever.emit(*args, **kwargs)
+            if isinstance(reciever, type(self))
+            else reciever(*args, **kwargs)
+            for reciever in self.recievers]
         self.active = False
         return response
 

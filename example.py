@@ -1,4 +1,4 @@
-# ECSPO: The Pythonic Entity Framework.
+# ECSPO: A Pythonic Entity Framework.
 # ========================================
 # AUTHOR: Arthur Maul II
 # DATE: 2024.10.5
@@ -54,7 +54,7 @@ class Vec2:
 # WARNING: All data, is localized to a storage, so if you use multiple, always make sure you are accessing the right one!
 
 
-world = Storage()
+world = Table()
 
 
 # Pools & Tags
@@ -78,7 +78,7 @@ world.set(e1, position, Vec2(10, 10))
 world.set(e1, velocity, Vec2(5, 5))
 world.set(e1, frozen)
 
-e2 = world.handle("e2")
+e2 = Entity(world.spawn("e2"))
 e2.set(position, Vec2(10, 10))
 e2.set(velocity, Vec2(5, 5))
 
@@ -89,7 +89,7 @@ e2.set(velocity, Vec2(5, 5))
 # NOTE: Prototypes are bound to a storage, but they can be reparented with the `<prototype>.reparent(<storage>)` method.
 
 
-base = (Prototype(world)
+base = (Template(world)
     .set(position, Vec2, 0, 0)
     .set(velocity, Vec2, 5, 5))
 

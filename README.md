@@ -21,6 +21,7 @@ it can then be imported using the library name under whatever alias you want
 import ecspo as engine
 ```
 ## TODO:
+- [ ] Pervasive error handling for ergonomics
 - [ ] Change systems to observers
 - [ ] Change scenes to schedules
 - [ ] Change observers to groups

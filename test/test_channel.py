@@ -1,23 +1,24 @@
 import unittest
 from unittest import TestCase
 
-from ecspo import Channel, RecursiveSubscription
+from ecspo import Channel, RecursiveConnection
+
 
 class TestChannel(TestCase):
     def setUp(self):
-        self.channel = Channel(ID="Test")
+        self.channel = Channel()
 
     def test_call(self):
         """
-        Ensure the __call__ method adds all responders.
+        Ensure the __call__ method adds all recievers.
         """
         self.channel(sum)
         self.channel(map)
-        self.assertListEqual([sum, map], self.channel.responders)
+        self.assertListEqual([sum, map], self.channel.recievers)
 
     def test_iter(self):
         """
-        Ensure the __iter__ method returns all responders.  
+        Ensure the __iter__ method returns all recievers.  
         """
         self.channel(sum)
         self.channel(map)
@@ -26,7 +27,7 @@ class TestChannel(TestCase):
     def test_connect(self):
         self.channel.connect(sum)
         self.channel.connect(map)
-        self.assertListEqual([sum, map], self.channel.responders)
+        self.assertListEqual([sum, map], self.channel.recievers)
 
     def test_emit(self):
         """
@@ -43,7 +44,7 @@ class TestChannel(TestCase):
 
         channel(self.channel)
         with self.subTest("Ensure recursive subscription is detected."):
-            with self.assertRaises(RecursiveSubscription):
+            with self.assertRaises(RecursiveConnection):
                 self.channel.emit(signal)
             
 
