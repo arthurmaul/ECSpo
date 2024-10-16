@@ -11,7 +11,7 @@
 ## Installation
 the easiest way to get up and running is to start you vm of choice and then to use pip
   
-```
+```zsh
 pip install ecspo
 ```
 
@@ -20,23 +20,18 @@ it can then be imported using the library name under whatever alias you want
 ```py
 import ecspo as engine
 ```
-## TODO:
-- [ ] Pervasive error handling for ergonomics
-- [ ] Change systems to observers
-- [ ] Change scenes to schedules
-- [ ] Change observers to groups
+
+## Documentation
+For documentation, read the [manual](docs/manual.md)
 
 ## Features
 - [x] Entities
 - [x] Components
 - [x] Tags
-- [ ] Relationships
 - [x] Prototypes
-- [x] Entity wrapper
-- [x] Prototype wrapper
 - [x] single component queries
 - [x] multi component queries
 
 ## Credits
-Heavily inspired by tinyecs
+Heavily inspired by tinyecs, found [here](https://github.com/dickerdackel/tinyecs)
 Massive thanks to [Matiiss](https://github.com/Matiiss) for doing code review, this project would be a mess without it!
