@@ -8,11 +8,8 @@ Ecspo is an entity component system written in python.
 It has no dependencies and is meant to be as simple as possible,
 while maintaining an ergonomic api.
 
-This first part of the manual servers as a quickstart guide for the library.
 
-The second part will serve as a reference.
-
-### Modules
+## Modules
 I prefer to pull in the lib modules directly for convinience.
 
 ```py
@@ -25,7 +22,7 @@ from ecspo import (
 
 You can easily import the lib itself under an alias and use `alias.function` or `alias.class` if you want.
 
-### Components
+## Components
 Components are classes with only data.
 They represent some piece of information an entity owns.
 What components an entity owns will determine how it behaves.
@@ -41,7 +38,7 @@ class Vec2:
 
 You can also use primitives like ints, strings, and even lists and dictionaries.
 
-### Table
+## Table
 In order to use the ecs, we need to instantiate a table object.
 This will hold our components for us, organized by entity id.
 
@@ -51,7 +48,7 @@ world = Table()
 
 Dont forget, all data is localized to a table, so if you use multiple, always make sure you are accessing the right one!
 
-### Pools & Tags
+## Pools & Tags
 Theres a number of ways we can store data in the ecs.
 Pools store component data. They can hold any data type.
 Tags are simple other entities added to the list of components an entity owns.
@@ -66,31 +63,31 @@ frozen = world.spawn("frozen")
 
 By passing in a string, we can explcitly state what we want the component to be identified as internally.
 
-### Entities
+## Entities
 Entities are identifiers used to access component data.
 Instead of holding attributes, they simply are a unique key
 This key used to associate data with the entity
 
 ```py
-e1 = world.spawn("e1")
-world.set(e1, position, Vec2(10, 10))
-world.set(e1, velocity, Vec2(5, 5))
-world.tag(e1, frozen)
+basic = world.spawn("basic")
+world.set(basic, position, Vec2(10, 10))
+world.set(basic, velocity, Vec2(5, 5))
+world.tag(basic, frozen)
 ```
 
-### Prototypes
+## Prototypes
 We can use entities as prototypes for other entities
 We can simply define it components and tags and clone it as necessary
 
 Prototypes must be duplicated to be shared between tables as theyre entities.
 
 ```py
-e2 = world.clone(e1, "e2")
-e3 = world.clone(e1, "e3")
-e4 = world.clone(e1, "e4")
+entity1 = world.clone(basic, "e2")
+entity2 = world.clone(basic, "e3")
+entity3 = world.clone(basic, "e4")
 ```
 
-### Queries
+## Queries
 Queries collect entities based on a specified filter strategy, storing all matches until rebuilt.
 You specify the filter strategy with the `.where` and `.unless` methods.
 Queries can be iterated over to access all the matching entity ids found in the last build.
@@ -106,7 +103,7 @@ moving = (Query(world)
 
 Be careful! Unless the entity composition never changes after the query creation, you must use the `query.build()` method to gather updated matches.
 
-### Channels
+## Channels
 Channels are subscription lists.
 You can connect functions using a predefined channel as a decorator... 
 
@@ -148,7 +145,7 @@ render = Channel()
 finish = Channel()
 ```
 
-# Systems
+## Systems
 Systems are plain functions.
 Each system must be subscribe to a channel to run.
 Any time an event is sent to a channel,
@@ -180,12 +177,6 @@ def main():
         render.emit()
 ```
 
----
-
-## Reference
-
-| Method | Parameters | Return | Description |
-| --- | --- | --- | --- |
-| Table |
-| | | |
+## Thats it!
+For further reading, I recommend skimming the source itself. Its quite modest and lovingly commented. Happy development!
 

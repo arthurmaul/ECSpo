@@ -2,7 +2,7 @@ from uuid import uuid4
 from copy import copy
 
 
-class InvalidEntityId(TypeError):
+class InvalidEntity(TypeError):
     pass
 
 
