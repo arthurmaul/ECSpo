@@ -12,8 +12,6 @@ This first part of the manual servers as a quickstart guide for the library.
 
 The second part will serve as a reference.
 
----
-
 ### Modules
 I prefer to pull in the lib modules directly for convinience.
 
@@ -181,4 +179,13 @@ def main():
         update.emit()
         render.emit()
 ```
+
+---
+
+## Reference
+
+| Method | Parameters | Return | Description |
+| --- | --- | --- | --- |
+| Table |
+| | | |
 
