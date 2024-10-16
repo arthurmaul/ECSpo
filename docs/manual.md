@@ -3,7 +3,7 @@ author: Arthur Maul II
 
 ---
 
-## Intro.
+## Intro
 Ecspo is an entity component system written in python.
 It has no dependencies and is meant to be as simple as possible,
 while maintaining an ergonomic api.
@@ -178,5 +178,5 @@ def main():
 ```
 
 ## Thats it!
-For further reading, I recommend skimming the source itself. Its quite modest and lovingly commented. Happy development!
+For further reading, I recommend skimming the source itself. Its quite modest. Happy development!
 
