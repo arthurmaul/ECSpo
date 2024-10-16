@@ -2,6 +2,14 @@ from uuid import uuid4
 from copy import copy
 
 
+class InvalidEntityId(TypeError):
+    pass
+
+
+class EntityNotFound(KeyError):
+    pass
+
+
 class InvalidTag(Exception):
     pass
 
@@ -25,23 +33,35 @@ class Table:
 
     def spawn(self, EID=None):
         EID = EID or str(uuid4())
-        self.emap[EID] = set()
+        try:
+            self.emap[EID] = set()
+        except TypeError:
+            raise InvalidEntityId(f"The entity ID {EID} is not hashable. Try using a string or an integer ID instead.")
         return EID
     
     def despawn(self, EID):
-        for CID in self.emap[EID]:
-            self.unset(CID, EID)
+        try:
+            for CID in self.emap[EID]:
+                self.unset(CID, EID)
+        except KeyError:
+            raise EntityNotFound(f"The entity ID {EID} was not found in the entity map. Make sure it was spawned, and not despawned twice.")
         self.emap.pop(EID)
 
     def pool(self, CID=None):
         CID = self.spawn(CID)
-        self.cmap[CID] = dict()
+        try:
+            self.cmap[CID] = dict()
+        except KeyError:
+            ...
         return CID
 
     def release(self, CID):
         if CID in self.cmap:
-            for EID in self.cmap[CID]:
-                self.unset(EID, CID)
+            try:
+                for EID in self.cmap[CID]:
+                    self.unset(EID, CID)
+            except KeyError:
+                raise ComponentNotFound(f"The component with entity ID {CID} was not found in the entity map. Did you forget to create it?")
             self.cmap.pop(CID)
         self.despawn(CID)
 

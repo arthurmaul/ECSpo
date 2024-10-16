@@ -22,12 +22,9 @@ from dataclasses import dataclass
 # I will also pull in the lib modules directly for convinience.
 # You can easily use `engine.<function or Class>` if you want.
 from ecspo import (
-    Storage,
-    Prototype,
-    Observer,
-    Channel,
-    Scene,
-    shutdown
+    Table,
+    Query,
+    Channel
 )
 
 
@@ -47,11 +44,11 @@ class Vec2:
     y: float = 0
 
 
-# Storage
+# Table
 # ==========
-# In order to use the ecs, we need to instantiate a storage object.
-# This will hold our components for us, organized by the entity.
-# WARNING: All data, is localized to a storage, so if you use multiple, always make sure you are accessing the right one!
+# In order to use the ecs, we need to instantiate a table object.
+# This will hold our components for us, organized by entity id.
+# WARNING: All data, is localized to a table, so if you use multiple, always make sure you are accessing the right one!
 
 
 world = Table()
@@ -61,56 +58,55 @@ world = Table()
 # ================
 # Theres a number of ways we can store data in the ecs.
 # Pools store component data. They can hold any data type.
-# Tags are simple added to the list of components an entity owns.
+# Tags are simple other entities added to the list of components an entity owns.
 # This allows us to filter entities with them, but they dont store anything.
 # NOTE: By passing in a string, we can explcitly state what we want the component to be identified as internally.
 
+
 position = world.pool("position")
 velocity = world.pool("velocity")
-frozen = world.tag("frozen")
+frozen = world.spawn("frozen")
+
 
 # Entities
 # ===========
+# Entities are identifiers used to access component data.
+# Instead of holding attributes, they simply are a unique key
+# This key used to associate data with the entity
 
 
 e1 = world.spawn("e1")
 world.set(e1, position, Vec2(10, 10))
 world.set(e1, velocity, Vec2(5, 5))
-world.set(e1, frozen)
+# world.tag(e1, frozen)
 
-e2 = Entity(world.spawn("e2"))
-e2.set(position, Vec2(10, 10))
-e2.set(velocity, Vec2(5, 5))
 
 # Prototypes
 # ============
-# Prototypes allow us to avoid repetitive assignments when constructing entities.
-# We can define a prototypal entitiy and what classes and values they will use, and simply clone them on demand.
-# NOTE: Prototypes are bound to a storage, but they can be reparented with the `<prototype>.reparent(<storage>)` method.
+# We can use entities as prototypes for other entities
+# We can simply define it components and tags and clone it as necessary
+# WARNING: Prototypes must be duplicated to be shared between tables as theyre entities.
 
 
-base = (Template(world)
-    .set(position, Vec2, 0, 0)
-    .set(velocity, Vec2, 5, 5))
-
-e3 = base.clone("e3")
-e4 = base.clone("e4")
+e2 = world.clone(e1, "e2")
+e3 = world.clone(e1, "e3")
+e4 = world.clone(e1, "e4")
 
 
 # Observers
 # ============
-# Observers are updated every time a component is set or unset, and are iterable, allowing you to access matching entities.
-# You may also specify component data to recieve instead using `.select` method.
+# Queries collect entities based on a specified filter strategy, storing all matches until rebuilt.
+# You specify the filter strategy with the `.where` and `.unless` methods.
+# Queries can be iterated over to access all the matching entity ids found in the last build.
+# You may also get specific component data to recieve instead using `.select` method.
 # The order of the component ids when you call the select method is the order they will be returned to you in.
-# You may also specify filters based on the `.where` and `.unless` methods.
-# NOTE: If the observer is created after entities are in the storage, you must use the `Observer.search()` method to gather existing matches.
+# NOTE: Unless the entity composition never changes after the query creation, you must use the `query.build()` method to gather updated matches.
 
 
-moving = (Observer(world)
+moving = (Query(world)
     .where(position, velocity)
     .unless(frozen)
     .build())
-moving.search()
 
 
 # Channels
@@ -160,7 +156,8 @@ def input_system():
     """
     match input('> '):
         case "quit" | "q":
-            shutdown()
+            finish.emit()
+            exit()
 
 
 @update
@@ -169,7 +166,7 @@ def movement_system():
     Gathers positions and velocities and maps velocity onto position.
     """
     # we can interate over observers using select to access specific components.
-    for pos, vel in moving.select(position, velocity):
+    for pos, vel in moving.build().select(position, velocity):
         pos.x += vel.x
         pos.y += vel.y
 
@@ -180,7 +177,7 @@ def draw_system():
     Gathers positions, velocities, and their associated ids and displays them on the screen.
     """
     # we can interate over observers to access entities.
-    for eid in moving:
+    for eid in moving.build():
         print(f'{eid}(pos: {world.get(eid, position)}, vel: {world.get(eid, velocity)})')
 
 
@@ -192,30 +189,17 @@ def say_byebye():
     print("Bye tester! Hope you had fun :)")
 
 
-def run():
+def main():
     """
-    Constructs the scenes and runs the main loop.
+    Runs the main loop.
     """
-    # Scenes
-    # =========
-    # Scenes are what actually runs the simulation
-    # They each have a schedule, consiting of a startup, a loop, and a shutdown, in that order.
-    scene = Scene(
-        # We can add channels directly to a scene ...
-        launch,
-        # or nest them in other channels to create more complex scenes.
-        Channel(
-            events,
-            update,
-            render),
-        finish)
-
-    # Once a scene has been configured with its schedule, you enter it with <scene>.enter()
-    # Calling enter on a scene will start its event loop,
-    # which will run until shutdown or leave is called
-    scene.enter()
-
+    launch.emit()
+    while True:
+        events.emit()
+        update.emit()
+        render.emit()
+        
 
 if __name__ == "__main__":
-    run()
+    main()
 

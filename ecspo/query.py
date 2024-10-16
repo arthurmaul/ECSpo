@@ -2,8 +2,8 @@ class Query:
     def __init__(self, table):
         self.table = table
         self.results = set()
-        self.incl = set()
-        self.excl = set()
+        self.included = set()
+        self.excluded = set()
 
     def __iter__(self):
         yield from self.results
@@ -14,22 +14,16 @@ class Query:
             for eid in self)
 
     def where(self, *cids):
-        self.incl.update(cids)
+        self.included.update(cids)
         return self
 
     def unless(self, *cids):
-        self.excl.update(cids)
+        self.excluded.update(cids)
         return self
 
     def build(self):
-        pools = [set(self.table.cmap[CID])
-            for CID in self.incl
-            if CID in self.table.cmap] 
+        pools = (set(self.table.cmap[CID]) for CID in self.included if CID in self.table.cmap)
         results = set.intersection(*pools)
-        self.results = {EID
-            for EID in results
-            if all([CID
-                not in self.table.emap[EID]
-                for CID in self.excl])}
+        self.results = {EID for EID in results if all((CID not in self.table.emap[EID] for CID in self.excluded))}
         return self
 
